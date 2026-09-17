@@ -40,6 +40,12 @@
         dismissedDownloads
       } = store;
 
+      // performance.timeOrigin is the creation time of this browser window.
+      // It lets the startup scan distinguish this session from persistent
+      // Firefox download history.
+      const sessionStartedAt =
+        Number.isFinite(performance.timeOrigin) ? performance.timeOrigin : Date.now();
+
       /** @type {Object|null} */
       let registeredView = null;
       /** @type {Object|null} */
@@ -79,6 +85,7 @@
                 getDownloadKey,
                 dismissedDownloads,
                 activeDownloadCards,
+                sessionStartedAt,
                 debugLog
               });
               const throttledUpdate = getThrottledCreateOrUpdateCard();

@@ -78,13 +78,27 @@
      * @param {function} ctx.getDownloadKey
      * @param {Set} ctx.dismissedDownloads
      * @param {Map} ctx.activeDownloadCards
+     * @param {number} ctx.sessionStartedAt - browser window startup timestamp in milliseconds
      * @param {function} ctx.debugLog
      * @returns {unknown[]}
      */
     filterInitialCompletedDownloads(all, ctx) {
-      const { getDownloadKey, dismissedDownloads, activeDownloadCards, debugLog } = ctx;
+      const {
+        getDownloadKey,
+        dismissedDownloads,
+        activeDownloadCards,
+        sessionStartedAt,
+        debugLog
+      } = ctx;
       return all.filter((dl) => {
         if (!dl.succeeded && !dl.error) {
+          return false;
+        }
+
+        // Downloads.ALL includes persistent history. Only hydrate downloads
+        // that completed while this browser window has been running.
+        const completedAt = new Date(dl.endTime || dl.startTime || 0).getTime();
+        if (!Number.isFinite(completedAt) || completedAt < sessionStartedAt) {
           return false;
         }
 
